@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BasuralMap — Monitoreo ambiental ciudadano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header id="header">
+  <div class="wrap nav">
+    <a class="brand" href="#" onclick="go('home');return false">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C7 6 4 10 4 14a8 8 0 0016 0c0-4-3-8-8-12zm0 3.3c3 2.6 5 5.5 5 8.7a5 5 0 01-5 5V5.3z"/></svg></span>
+      BasuralMap
+    </a>
+    <nav class="nav-links" id="navlinks">
+      <a data-v="home"      onclick="go('home');return false"      href="#">Inicio</a>
+      <a data-v="map"       onclick="go('map');return false"       href="#">Mapa</a>
+      <a data-v="report"    onclick="go('report');return false"    href="#">Reportar</a>
+      <a data-v="panel"     onclick="go('panel');return false"     href="#">Panel</a>
+      <a data-v="satellite" onclick="go('satellite');return false" href="#">Satélite</a>
+    </nav>
+    <div class="nav-right">
+      <span class="pill-status"><span class="dot"></span> Datos en vivo</span>
+      <div class="avatar">AM</div>
+      <button class="hamburger" id="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a onclick="go('home');return false" href="#">Inicio</a>
+  <a onclick="go('map');return false" href="#">Mapa</a>
+  <a onclick="go('report');return false" href="#">Reportar</a>
+  <a onclick="go('panel');return false" href="#">Panel</a>
+  <a onclick="go('satellite');return false" href="#">Satélite</a>
+</div>
+
+<!-- ============ HOME ============ -->
+<div class="view active" id="view-home">
+
+  <!-- HERO -->
+  <section class="hero-section">
+    <canvas id="heroCanvas"></canvas>
+    <div class="wrap hero-inner">
+      <div class="hero-text">
+        <span class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Monitoreo ambiental oficial
+        </span>
+        <h1 class="hero-h1">Detectar, reportar<br>y <em>transformar</em><br>el ambiente.</h1>
+        <p class="hero-p">Plataforma integral para el reporte geolocalizado de basurales a cielo abierto, seguimiento de limpiezas y monitoreo satelital ciudadano en toda Argentina.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary" onclick="go('report')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            Reportar basural
+          </button>
+          <button class="btn btn-soft" onclick="go('map')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20l-6-2V4l6 2 6-2 6 2v14l-6-2-6 2zM9 6v14M15 4v14"/></svg>
+            Ver mapa público
+          </button>
+          <button class="btn btn-ghost" onclick="go('panel')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Panel municipal
+          </button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-map-card">
+          <div class="hmap-bg">
+            <div class="hmap-topo"></div>
+            <svg class="hmap-arg" viewBox="0 0 200 380" fill="#1f9d57" fill-opacity=".88">
+              <path d="M95 8 L120 30 L112 70 L128 95 L118 130 L132 160 L120 200 L130 240 L108 280 L112 320 L92 372 L78 340 L84 300 L70 270 L80 235 L66 200 L78 160 L64 130 L76 100 L62 70 L80 38 Z"/>
+            </svg>
+            <div class="hero-pin" style="top:30%;left:48%"></div>
+            <div class="hero-pin" style="top:42%;left:54%"></div>
+            <div class="hero-pin c" style="top:52%;left:46%"></div>
+            <div class="hero-pin" style="top:62%;left:52%"></div>
+            <div class="hero-pin" style="top:36%;left:42%"></div>
+            <div class="hmap-pulse" style="top:52%;left:46%"></div>
+          </div>
+          <div class="hmap-footer">
+            <div class="hmap-stat">
+              <span class="hmap-num red">1,248</span>
+              <small>Sitios activos</small>
+            </div>
+            <div class="hmap-stat">
+              <span class="hmap-num green">856</span>
+              <small>Limpiezas</small>
+            </div>
+            <div class="hmap-stat">
+              <span class="hmap-num blue">32.4k</span>
+              <small>Reportes</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll-hint">
+      <span>Deslizá para explorar</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-band">
+    <div class="wrap">
+      <div class="stats-grid">
+        <div class="stat-item" data-aos="fade-up" data-aos-delay="0">
+          <div class="stat-icon" style="background:var(--crit-soft);color:var(--crit)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h0"/></svg></div>
+          <div class="stat-num" data-count="1248" style="color:var(--crit)">0</div>
+          <div class="stat-label">Basurales activos</div>
+          <div class="stat-bar" style="background:var(--crit)"></div>
+        </div>
+        <div class="stat-item" data-aos="fade-up" data-aos-delay="80">
+          <div class="stat-icon" style="background:var(--leaf-soft);color:var(--forest)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg></div>
+          <div class="stat-num" data-count="856" style="color:var(--forest)">0</div>
+          <div class="stat-label">Limpiezas ejecutadas</div>
+          <div class="stat-bar" style="background:var(--forest)"></div>
+        </div>
+        <div class="stat-item" data-aos="fade-up" data-aos-delay="160">
+          <div class="stat-icon" style="background:var(--data-soft);color:var(--data)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.9M16 3.1a4 4 0 010 7.8"/></svg></div>
+          <div class="stat-num" data-count="32400" data-fmt="k" style="color:var(--data)">0</div>
+          <div class="stat-label">Reportes ciudadanos</div>
+          <div class="stat-bar" style="background:var(--data)"></div>
+        </div>
+        <div class="stat-item" data-aos="fade-up" data-aos-delay="240">
+          <div class="stat-icon" style="background:var(--warn-soft);color:var(--warn)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13.7 21a2 2 0 01-3.4 0M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9z"/></svg></div>
+          <div class="stat-num" data-count="125" style="color:var(--warn)">0</div>
+          <div class="stat-label">Alertas en revisión</div>
+          <div class="stat-bar" style="background:var(--warn)"></div>
+        </div>
+        <div class="stat-item" data-aos="fade-up" data-aos-delay="320">
+          <div class="stat-icon" style="background:#f0eeff;color:#7c3aed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+          <div class="stat-num" data-count="42" style="color:#7c3aed">0</div>
+          <div class="stat-label">Municipios activos</div>
+          <div class="stat-bar" style="background:#7c3aed"></div>
+        </div>
+        <div class="stat-item" data-aos="fade-up" data-aos-delay="400">
+          <div class="stat-icon" style="background:#fff3e0;color:#e65100"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="stat-num" data-count="4" data-suffix="hs" style="color:#e65100">0</div>
+          <div class="stat-label">Tiempo promedio de respuesta</div>
+          <div class="stat-bar" style="background:#e65100"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIDEO SECTION -->
+  <section class="video-section">
+    <div class="wrap">
+      <div class="sec-head" data-aos="fade-up">
+        <div>
+          <span class="sec-tag">Impacto real</span>
+          <h2>El problema que enfrentamos juntos</h2>
+          <p>Mirá cómo BasuralMap está transformando comunidades a lo largo de Argentina.</p>
+        </div>
+      </div>
+      <div class="video-grid" data-aos="fade-up" data-aos-delay="100">
+        <div class="video-main">
+          <div class="video-embed">
+            <!-- Documental Riachuelo — Ministerio de Ambiente / ACUMAR -->
+            <iframe
+              src="https://www.youtube.com/embed/4Y9l4uNMCKM?rel=0&color=white&modestbranding=1"
+              title="Saneamiento del Riachuelo — ACUMAR"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+          <div class="video-caption">
+            <span class="video-tag">Documental</span>
+            <h3>Saneamiento del Riachuelo — el proyecto más grande de Argentina</h3>
+            <p>Un recorrido por el esfuerzo colectivo de saneamiento en la cuenca Matanza-Riachuelo y el rol de la tecnología ciudadana en el monitoreo ambiental.</p>
+          </div>
+        </div>
+        <div class="video-sidebar">
+          <div class="video-card" onclick="openVideoModal('OkIakyKSIuE','Basurales a cielo abierto en Argentina')">
+            <div class="vc-thumb" style="background:linear-gradient(135deg,#5a3a1a,#8a6040)">
+              <svg class="play-sm" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+              <span class="vc-dur">4:32</span>
+            </div>
+            <div class="vc-info">
+              <b>Basurales a cielo abierto en Argentina</b>
+              <small>Investigación periodística — TN</small>
+            </div>
+          </div>
+          <div class="video-card" onclick="openVideoModal('H5GKnXL3qEg','Tecnología satelital para detección ambiental')">
+            <div class="vc-thumb" style="background:linear-gradient(135deg,#0d4733,#1f9d57)">
+              <svg class="play-sm" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+              <span class="vc-dur">6:14</span>
+            </div>
+            <div class="vc-info">
+              <b>Tecnología satelital para detección ambiental</b>
+              <small>CONAE — Comisión Nacional</small>
+            </div>
+          </div>
+          <div class="video-card" onclick="openVideoModal('LkCNJRfSZBU','Cómo hacer un reporte ciudadano')">
+            <div class="vc-thumb" style="background:linear-gradient(135deg,#0d6e82,#1ab0d4)">
+              <svg class="play-sm" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+              <span class="vc-dur">1:28</span>
+            </div>
+            <div class="vc-info">
+              <b>¿Cómo hacer un reporte ciudadano?</b>
+              <small>Guía rápida — BasuralMap</small>
+            </div>
+          </div>
+          <div class="video-card" onclick="openVideoModal('tEH2OJu3TbM','Municipios: gestión de residuos inteligente')">
+            <div class="vc-thumb" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">
+              <svg class="play-sm" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+              <span class="vc-dur">9:05</span>
+            </div>
+            <div class="vc-info">
+              <b>Municipios: gestión inteligente de residuos</b>
+              <small>Congreso Nacional de Ambiente 2024</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features-section" style="background:var(--paper-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+    <div class="wrap">
+      <div class="sec-head" data-aos="fade-up">
+        <div>
+          <span class="sec-tag">Tecnología</span>
+          <h2>Herramientas al servicio del ecosistema</h2>
+          <p>Diseñadas para la transparencia y la acción ambiental inmediata.</p>
+        </div>
+        <a class="link-more" onclick="go('panel');return false" href="#">Explorar funciones <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="feat-grid">
+        <div class="feat-card" data-aos="fade-up" data-aos-delay="0">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-5.6 7-12A7 7 0 005 9c0 6.4 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
+          <h3>Reportes geolocalizados</h3>
+          <p>Cada reporte ciudadano incluye coordenadas exactas, fotos del estado inicial y categorización del tipo de residuo para una respuesta eficiente.</p>
+          <ul class="feat-checks">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Precisión GPS satelital</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Carga de evidencia fotográfica</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Verificación cruzada con vecinos</li>
+          </ul>
+        </div>
+        <div class="feat-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="feat-icon" style="background:var(--data-soft);color:var(--data)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+          <h3>Panel de gestión municipal</h3>
+          <p>Herramientas exclusivas para municipios. Centraliza denuncias, asigna cuadrillas y genera reportes de impacto ambiental trimestrales.</p>
+          <div class="feat-progress">
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--ink-soft)"><span>Resolutividad 2024</span><span style="color:var(--forest)">78%</span></div>
+            <div class="prog-bar"><span style="width:78%"></span></div>
+          </div>
+        </div>
+        <div class="feat-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="feat-icon" style="background:#fff3e0;color:#e65100"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 106 5.3L3 8"/></svg></div>
+          <h3>Antes y después</h3>
+          <p>Visualizá la transformación de tu barrio. Guardamos un registro histórico de cada sitio recuperado para asegurar que se mantenga libre de residuos.</p>
+          <div class="ba-preview">
+            <div class="ba-before"><span>Antes</span></div>
+            <div class="ba-after"><span>Después</span></div>
+          </div>
+        </div>
+        <div class="feat-card feat-dark" data-aos="fade-up" data-aos-delay="300">
+          <div class="feat-icon" style="background:rgba(255,255,255,.12);color:#fff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12a7 7 0 017-7M5 12a7 7 0 007 7M2 12a10 10 0 0110-10M2 12a10 10 0 0010 10"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg></div>
+          <h3>Sincronización satelital</h3>
+          <p>Usamos imágenes de baja órbita para detectar cambios en la biomasa y prevenir la formación de micro-basurales antes de que crezcan.</p>
+          <button class="btn" style="background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.22);margin-top:22px;backdrop-filter:blur(8px)" onclick="go('satellite')">
+            Ver tecnología <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          <div class="feat-dark-deco"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials-section">
+    <div class="wrap">
+      <div class="sec-head" style="justify-content:center;text-align:center" data-aos="fade-up">
+        <div>
+          <span class="sec-tag">Comunidad</span>
+          <h2>Lo que dicen municipios y vecinos</h2>
+        </div>
+      </div>
+      <div class="testi-grid">
+        <div class="testi-card" data-aos="fade-up" data-aos-delay="0">
+          <div class="testi-stars">★★★★★</div>
+          <p>"Gracias a BasuralMap logramos reducir en un 60% los basurales crónicos en menos de un año. La plataforma simplificó enormemente la gestión operativa de nuestras cuadrillas."</p>
+          <div class="testi-author">
+            <div class="testi-avatar">MC</div>
+            <div><b>María Castro</b><small>Secretaría de Ambiente — Municipio de Quilmes</small></div>
+          </div>
+        </div>
+        <div class="testi-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="testi-stars">★★★★★</div>
+          <p>"Reporté un basural en mi barrio y en menos de 48 horas tenían una cuadrilla limpiando. La respuesta del municipio fue increíble. Ahora sigo reportando regularmente."</p>
+          <div class="testi-author">
+            <div class="testi-avatar">JR</div>
+            <div><b>Juan Rodríguez</b><small>Vecino — Berazategui, Buenos Aires</small></div>
+          </div>
+        </div>
+        <div class="testi-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="testi-stars">★★★★★</div>
+          <p>"La detección satelital nos permitió identificar 23 micro-basurales en zonas industriales antes de que se convirtieran en un problema grave. Es tecnología preventiva real."</p>
+          <div class="testi-author">
+            <div class="testi-avatar">LP</div>
+            <div><b>Lic. Laura Pérez</b><small>ACUMAR — Autoridad de Cuenca Matanza Riachuelo</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="wrap">
+      <div class="cta-card" data-aos="zoom-in">
+        <div class="cta-deco"></div>
+        <div class="cta-content">
+          <h2>¿Tu municipio ya usa BasuralMap?</h2>
+          <p>Sumá tu distrito a la red de monitoreo ambiental ciudadano más grande de Argentina. Gratuito para organismos públicos.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:32px">
+            <button class="btn btn-white" onclick="toast('Solicitud enviada — te contactamos en 24 horas ✓')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.9M16 3.1a4 4 0 010 7.8"/></svg>
+              Sumar mi municipio
+            </button>
+            <button class="btn btn-outline-white" onclick="go('report')">Hacer un reporte ciudadano</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap foot">
+      <div>
+        <a class="brand footer-brand" href="#" onclick="go('home');return false">
+          <span class="logo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C7 6 4 10 4 14a8 8 0 0016 0c0-4-3-8-8-12zm0 3.3c3 2.6 5 5.5 5 8.7a5 5 0 01-5 5V5.3z"/></svg></span>
+          BasuralMap
+        </a>
+        <p style="margin-top:14px;font-size:14.5px;max-width:280px;color:#cfe3d9;line-height:1.6">Monitoreo ambiental inteligente para una Argentina más limpia y sostenible.</p>
+        <div class="soc">
+          <a href="#" title="Compartir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></a>
+          <a href="#" title="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 6 10-6"/></svg></a>
+          <a href="#" title="Twitter/X"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-2.5 1.5-4 2c-1-1.2-2.5-2-4-2-3 0-5 2.5-5 5v1C6 10 3 8.5 2 7c0 0-1 5 4 7-1 1-2 1.5-3 1.5 1 2.5 4.5 4 8 4-2 1.5-5 2-8 2 3 2 10 3 14-2 4-4 3-9 3-13.5l2-2z"/></svg></a>
+        </div>
+      </div>
+      <div><h5>Recursos</h5><ul><li><a href="#">Metodología</a></li><li><a href="#">Open Data API</a></li><li><a href="#">Guía ciudadana</a></li><li><a href="#">Blog ambiental</a></li></ul></div>
+      <div><h5>Institucional</h5><ul><li><a href="#">Aliados municipales</a></li><li><a href="#">Prensa</a></li><li><a href="#">Contacto</a></li><li><a href="#">Sobre nosotros</a></li></ul></div>
+      <div><h5>Legal</h5><ul><li><a href="#">Términos de uso</a></li><li><a href="#">Privacidad</a></li><li><a href="#">Transparencia</a></li></ul></div>
+    </div>
+    <div class="foot-bottom">© 2025 BasuralMap Argentina · Iniciativa de software libre para el ambiente. Hecho con ♻ en Argentina.</div>
+  </footer>
+</div>
+
+<!-- ============ MAP ============ -->
+<div class="view" id="view-map">
+  <div class="wrap" style="padding-bottom:60px">
+    <div class="pagehead">
+      <h2>Mapa público de basurales</h2>
+      <p class="muted">Reportes verificados en tiempo real. Filtrá por estado o tipo de residuo.</p>
+    </div>
+    <div class="map-toolbar">
+      <div class="map-chips">
+        <div class="chip"><b style="color:var(--crit)">342</b> Reportados</div>
+        <div class="chip"><b style="color:var(--forest)">128</b> Clausurados</div>
+        <div class="chip"><b style="color:var(--data)">15</b> Nuevos hoy</div>
+        <div class="chip"><b>42</b> Municipios</div>
+      </div>
+      <div class="map-filters">
+        <select id="fEstado" onchange="filterMap()">
+          <option value="all">Estado: Todos</option>
+          <option value="critico">Críticos</option>
+          <option value="activo">Activos</option>
+          <option value="limpieza">En limpieza</option>
+          <option value="cerrado">Cerrados</option>
+        </select>
+        <select id="fResiduo" onchange="filterMap()">
+          <option value="all">Residuo: Todos</option>
+          <option value="dom">Domiciliario</option>
+          <option value="escombros">Escombros</option>
+          <option value="electr">Electrónicos</option>
+          <option value="org">Orgánicos</option>
+        </select>
+        <button class="btn btn-primary" style="padding:10px 18px" onclick="filterMap()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          Filtrar
+        </button>
+      </div>
+    </div>
+    <div id="leafletMap" style="height:580px;margin-top:14px"></div>
+  </div>
+</div>
+
+<!-- ============ REPORT ============ -->
+<div class="view" id="view-report">
+  <div class="wrap report-wrap">
+    <div class="report-header">
+      <h2>Nuevo reporte</h2>
+      <p class="sub">Ayudanos a mantener la ciudad limpia informando sobre acumulación de residuos.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step active" id="step-1"><span>1</span> Evidencia</div>
+      <div class="step-line"></div>
+      <div class="step" id="step-2"><span>2</span> Ubicación</div>
+      <div class="step-line"></div>
+      <div class="step" id="step-3"><span>3</span> Detalles</div>
+      <div class="step-line"></div>
+      <div class="step" id="step-4"><span>4</span> Confirmar</div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="step-panel active" id="panel-1">
+      <div class="flabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L15 6"/></svg> Evidencia visual</div>
+      <div class="dropzone" id="dropzone" onclick="fillDrop()">
+        <div class="dz-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l1.5-2.5h5L16 7"/></svg></div>
+        <b id="dropTitle">Subir o tomar foto</b>
+        <small id="dropSub">JPG, PNG o directo desde la cámara · máx. 10MB</small>
+        <div class="dz-types"><span>JPG</span><span>PNG</span><span>HEIC</span><span>WebP</span></div>
+      </div>
+      <div id="photoPreview" style="display:none" class="photo-preview">
+        <img id="previewImg" src="" alt="Preview">
+        <div class="preview-info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+          <span id="previewName">foto_basural.jpg</span>
+          <button onclick="clearPhoto()" style="margin-left:auto;color:var(--crit);font-size:18px;line-height:1">✕</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="nextStep(2)" style="margin-top:22px">
+        Continuar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step-panel" id="panel-2">
+      <div class="flabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-5.6 7-12A7 7 0 005 9c0 6.4 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg> Ubicación detectada</div>
+      <div id="reportMap" style="height:280px;border-radius:14px;border:1px solid var(--line);margin-bottom:16px"></div>
+      <div class="loc-card">
+        <div class="mini-map-thumb"></div>
+        <div>
+          <b>Calle Falsa 123</b><br>
+          <span class="muted" style="font-size:14px">C1001 CABA, Argentina</span><br>
+          <span class="gps">GPS: -34.6037, -58.3816</span>
+        </div>
+        <a class="edit" href="#" onclick="toast('Editor de ubicación abierto');return false">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg> Editar
+        </a>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:22px">
+        <button class="btn btn-ghost" onclick="nextStep(1)">← Atrás</button>
+        <button class="btn btn-primary" style="flex:1" onclick="nextStep(3)">Continuar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step-panel" id="panel-3">
+      <div class="flabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> Tipo de residuo</div>
+      <div class="chips-residuo">
+        <button class="rchip" onclick="this.classList.toggle('on')">Escombros</button>
+        <button class="rchip on" onclick="this.classList.toggle('on')">Orgánicos</button>
+        <button class="rchip on" onclick="this.classList.toggle('on')">Plásticos / Vidrio</button>
+        <button class="rchip on" onclick="this.classList.toggle('on')">Muebles</button>
+        <button class="rchip on" onclick="this.classList.toggle('on')">Electrónicos</button>
+        <button class="rchip" onclick="this.classList.toggle('on')">Peligrosos</button>
+        <button class="rchip" onclick="this.classList.toggle('on')">Chatarra</button>
+      </div>
+
+      <div class="flabel" style="margin-top:28px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg> Nivel de urgencia</div>
+      <div class="urgency-selector">
+        <label class="urgency-opt">
+          <input type="radio" name="urgency" value="baja" checked>
+          <span><i style="background:var(--forest)"></i> Baja — No afecta el tránsito ni genera riesgos</span>
+        </label>
+        <label class="urgency-opt">
+          <input type="radio" name="urgency" value="media">
+          <span><i style="background:var(--warn)"></i> Media — Acumulación importante, necesita atención pronto</span>
+        </label>
+        <label class="urgency-opt">
+          <input type="radio" name="urgency" value="alta">
+          <span><i style="background:var(--crit)"></i> Alta — Bloqueo o riesgo sanitario, urgente</span>
+        </label>
+      </div>
+
+      <div class="flabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h10"/></svg> Descripción</div>
+      <textarea placeholder="Ej: Hay bolsas acumuladas hace más de 3 días bloqueando el paso peatonal..."></textarea>
+
+      <div class="toggle-row">
+        <div><b>Reporte anónimo</b><br><small>No mostraremos tu nombre en el mapa público</small></div>
+        <div class="switch" id="anon" onclick="this.classList.toggle('on')"><i></i></div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:22px">
+        <button class="btn btn-ghost" onclick="nextStep(2)">← Atrás</button>
+        <button class="btn btn-primary" style="flex:1" onclick="nextStep(4)">Revisar reporte <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step-panel" id="panel-4">
+      <div class="confirm-card">
+        <div class="confirm-photo">
+          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" alt="Evidencia">
+          <div class="confirm-overlay">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="18" height="18"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+            <span>basural_evidencia.jpg</span>
+          </div>
+        </div>
+        <div class="confirm-details">
+          <h4>Revisá tu reporte antes de enviar</h4>
+          <div class="confirm-row"><span>Ubicación</span><b>Calle Falsa 123, CABA</b></div>
+          <div class="confirm-row"><span>Residuos</span><b>Orgánicos, Plásticos, Muebles, Electrónicos</b></div>
+          <div class="confirm-row"><span>Urgencia</span><b style="color:var(--warn)">Media</b></div>
+          <div class="confirm-row"><span>Modo</span><b>Reporte público</b></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:22px">
+        <button class="btn btn-ghost" onclick="nextStep(3)">← Editar</button>
+        <button class="btn btn-primary" style="flex:1;padding:18px" onclick="submitReport()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>
+          Enviar reporte
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PANEL ============ -->
+<div class="view" id="view-panel">
+  <div class="wrap" style="padding-bottom:60px">
+    <div class="pagehead" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
+      <div>
+        <h2>Panel municipal de gestión</h2>
+        <p class="muted">Vista general del estado de saneamiento ambiental en el distrito.</p>
+      </div>
+      <button class="btn btn-primary" onclick="toast('Informe PDF generado ✓')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Exportar informe
+      </button>
+    </div>
+    <div class="panel-stats">
+      <div class="pstat"><span class="pstat-n" style="color:var(--crit)">342</span><small>Activos</small></div>
+      <div class="pstat"><span class="pstat-n" style="color:var(--forest)">128</span><small>Cerrados</small></div>
+      <div class="pstat"><span class="pstat-n" style="color:var(--warn)">47</span><small>En revisión</small></div>
+      <div class="pstat"><span class="pstat-n" style="color:var(--data)">23</span><small>En limpieza</small></div>
+      <div class="pstat"><span class="pstat-n" style="color:#7c3aed">4hs</span><small>T. respuesta</small></div>
+    </div>
+    <div class="panel-grid">
+      <div id="panelMap" style="border-radius:18px;overflow:hidden;min-height:380px;border:1px solid var(--line)"></div>
+      <div class="card alerts">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13.7 21a2 2 0 01-3.4 0M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9z"/></svg> Alertas críticas</h3>
+        <div class="alert red"><div class="top"><b>3 nuevos reportes</b><span class="when">Ahora</span></div><p>Ciudadanos reportaron quema de basura en Barrio San Jorge.</p></div>
+        <div class="alert blue"><div class="top"><b>Detección satelital</b><span class="when">2h atrás</span></div><p>Anomalía térmica detectada en zona industrial norte. Posible acumulación.</p></div>
+        <div class="alert-none">No hay más alertas pendientes de revisión inmediata.</div>
+        <button class="btn btn-ghost" style="width:100%;margin-top:14px">Ver todas las alertas</button>
+      </div>
+    </div>
+    <div class="panel-grid-2">
+      <div class="card chart-card">
+        <h3>Evolución mensual <span class="pillsm">Últimos 6 meses</span></h3>
+        <div style="height:200px;margin-top:14px"><canvas id="chartLine"></canvas></div>
+      </div>
+      <div class="card chart-card">
+        <h3>Por tipo de residuo <span class="pillsm">2025</span></h3>
+        <div style="height:200px;margin-top:14px"><canvas id="chartDonut"></canvas></div>
+      </div>
+    </div>
+    <div class="panel-grid-2">
+      <div class="card">
+        <h3 style="font-size:21px;display:flex;justify-content:space-between;align-items:center">Reportes recientes <a class="link-more" style="font-size:14px" onclick="go('map');return false" href="#">Ver historial</a></h3>
+        <table style="margin-top:10px">
+          <thead><tr><th>ID</th><th>Ubicación</th><th>Estado</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><b>#0452</b></td><td><b>Av. Rivadavia 4500</b><small>Residuos sólidos urbanos</small></td><td><span class="st act">Activo</span></td><td><span class="eye" onclick="toast('Abriendo reporte #0452')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></span></td></tr>
+            <tr><td><b>#0451</b></td><td><b>Calle Falsa 123</b><small>Escombros</small></td><td><span class="st rev">En revisión</span></td><td><span class="eye" onclick="toast('Abriendo reporte #0451')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></span></td></tr>
+            <tr><td><b>#0449</b></td><td><b>Camino Real km 8</b><small>Domiciliario</small></td><td><span class="st clo">Cerrado</span></td><td><span class="eye" onclick="toast('Abriendo reporte #0449')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></span></td></tr>
+            <tr><td><b>#0448</b></td><td><b>Ruta 3 km 42</b><small>Electrónicos</small></td><td><span class="st rev">En revisión</span></td><td><span class="eye" onclick="toast('Abriendo reporte #0448')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card">
+          <h3 style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)">Gestión de estado · #0452</h3>
+          <p class="muted" style="font-size:14px;margin:8px 0 16px">Av. Rivadavia 4500 — Residuos sólidos urbanos</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-ghost" onclick="toast('Limpieza programada para #0452 ✓')">Programar limpieza</button>
+            <button class="btn btn-soft" onclick="toast('Derivado a cuadrilla B ✓')">Asignar cuadrilla</button>
+            <button class="btn btn-primary" onclick="toast('Caso #0452 cerrado ✓')">Cerrar caso</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)">Documentación</h3>
+          <div class="file-row">
+            <div class="file" onclick="toast('Descargando Informe_Q1_2025.pdf')"><span class="fi" style="background:var(--crit)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span><div><b>Informe_Q1_2025.pdf</b><small>4.2 MB</small></div></div>
+            <div class="file" onclick="toast('Abriendo Evidencia_Rivadavia.jpg')"><span class="fi" style="background:var(--data)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span><div><b>Evidencia_Rivadavia.jpg</b><small>2.1 MB</small></div></div>
+            <div class="upload-box" onclick="toast('Selector de archivos abierto')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>Subir</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SATELLITE ============ -->
+<div class="view" id="view-satellite">
+  <div class="wrap" style="padding-bottom:60px">
+    <div class="pagehead">
+      <span style="font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--data);text-transform:uppercase">AI Detection Engine</span>
+      <h2 style="margin-top:6px">Análisis satelital</h2>
+      <p class="muted">Detección de anomalías mediante procesamiento multiespectral e inteligencia artificial.</p>
+    </div>
+    <div class="sat-grid">
+      <div>
+        <div class="sat-img">
+          <div class="sky"></div><div class="river2"></div><div class="veg"></div>
+          <div class="sat-tag"><i></i> Detección activa: #ST-9921</div>
+          <div class="sat-toggle">
+            <button class="on" onclick="satToggle(this,'Satélite')">Satélite</button>
+            <button onclick="satToggle(this,'Vectorial')">Vectorial</button>
+          </div>
+          <div class="detect-box"><span>Posible vertedero</span></div>
+          <div class="coords">
+            <div><small>Latitud</small><b>-34.6037</b></div>
+            <div><small>Longitud</small><b>-58.3816</b></div>
+            <div><small>Altitud</small><b>25m</b></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <small class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:700">Alertas en la zona</small>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="width:36px;height:36px;border-radius:9px;background:var(--crit-soft);color:var(--crit);display:grid;place-items:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg></span>
+              <div style="flex:1"><b style="font-size:14.5px">ST-9918</b><br><small class="muted">Hace 2 días · En revisión</small></div>
+              <span class="st rev">En revisión</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="width:36px;height:36px;border-radius:9px;background:var(--leaf-soft);color:var(--forest);display:grid;place-items:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></span>
+              <div style="flex:1"><b style="font-size:14.5px">ST-9902</b><br><small class="muted">Hace 5 días · Validado</small></div>
+              <span class="st clo">Validado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card confidence">
+          <h4 style="font-size:21px;margin-bottom:14px">Nivel de confianza</h4>
+          <div class="big">94<span>%</span></div>
+          <div class="conf-bar"><i style="width:94%"></i></div>
+          <p>Detección multiespectral mediante <b>EcoVision-v4</b>. El análisis sugiere acumulación de plásticos y escombros en una zona sin vegetación activa.</p>
+          <div class="conf-breakdown">
+            <div><small>NDVI</small><b>-0.12</b></div>
+            <div><small>Área</small><b>~840m²</b></div>
+            <div><small>Banda NIR</small><b>anomalía</b></div>
+          </div>
+        </div>
+        <div class="card verif">
+          <h4>Acciones de verificación</h4>
+          <button class="btn btn-primary" onclick="toast('Detección validada y notificada al municipio ✓')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+            Validar detección
+          </button>
+          <button class="btn btn-crit" onclick="toast('Detección descartada')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+            Descartar
+          </button>
+          <button class="btn btn-ghost" onclick="toast('Marcado para revisión manual')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/></svg>
+            Marcar como dudoso
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="compare-card">
+      <div class="compare-head">
+        <h3>Comparación histórica · antes y después</h3>
+        <div class="leg">
+          <span><i style="background:#9fb6a0"></i> Ene 2023</span>
+          <span><i style="background:var(--forest)"></i> Nov 2025 (actual)</span>
+        </div>
+      </div>
+      <div class="compare" id="compare">
+        <div class="cmp-layer cmp-after"><div class="trash"></div></div>
+        <div class="cmp-layer cmp-before" id="cmpBefore"><div class="field"></div></div>
+        <span class="cmp-lbl l">Enero 2023</span>
+        <span class="cmp-lbl r">Noviembre 2025</span>
+        <div class="cmp-handle" id="cmpHandle">
+          <div class="grip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3"/></svg></div>
+        </div>
+      </div>
+      <div class="compare-foot">
+        <div><small>Área afectada</small><b>~1.240 m²</b></div>
+        <div><small>Tipo detectado</small><b>Residuos sólidos urbanos</b></div>
+        <div><small>Progreso (12 meses)</small><b class="up">+42% incremento</b></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEO MODAL -->
+<div class="modal" id="videoModal" onclick="closeVideoModal(event)">
+  <div class="modal-box" style="position:relative">
+    <button class="modal-close" onclick="closeVideoModal()">✕</button>
+    <div class="modal-video">
+      <iframe id="modalFrame" src="" frameborder="0" allow="autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="modal-title" id="modalTitle"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+  <span id="toastMsg">Listo</span>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
