@@ -376,7 +376,7 @@ function fillDrop() {
   document.getElementById('dropTitle').textContent = '✓ Foto lista para enviar';
   document.getElementById('dropSub').textContent = 'basural_evidencia.jpg · 2.4 MB';
   // show preview with placeholder image
-  document.getElementById('previewImg').src = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&q=80';
+  document.getElementById('previewImg').src = 'basural_evidencia.jpg';
   document.getElementById('previewName').textContent = 'basural_evidencia.jpg';
   preview.style.display = 'flex';
 }
